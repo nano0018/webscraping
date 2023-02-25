@@ -41,7 +41,7 @@ def create_html_index():
     dummy_html.write('\n')
     dummy_html.write('      <h2>Live site:</h2>')
     dummy_html.write('\n')
-    dummy_html.write('        <a href="https://scraping-web-classcentral.pages.dev/web/">Click here to go to the live site</a>')
+    dummy_html.write('        <a href="/web/index.html">Click here to go to the live site</a>')
     dummy_html.write('\n')
     dummy_html.write('    </div>')
     dummy_html.write('\n')
