@@ -42,7 +42,7 @@ def web_scraper(url, language="es"):
         """Scroll the page and force to use google translate"""
 
         pyautogui.press('esc')
-        pyautogui.moveTo(100, 200, 2)
+        pyautogui.moveTo(0, 127, 2)
         pyautogui.click(button='right')
         for i in range(3):
             pyautogui.sleep(0.25)
@@ -60,50 +60,117 @@ def web_scraper(url, language="es"):
         print('Done!')
 
     def save_page(path="", filename=""):
-        full_path = "//web//"
-        if not path:
-            full_path = "//web//" + path + "//"
+        full_path = current_path + "\\web\\"
+        if path:
+            full_path = current_path + "\\web\\" + path + "\\"
+            try:
+                os.mkdir(full_path)
+            except OSError as error:
+                print(error)
+
         full_path += filename
-        html_source_code = driver.page_source
-        text_file = open((current_path + full_path),
-                         "w", encoding="utf-8")
-        text_file.write(html_source_code)
-        text_file.close()
+        print(full_path)
+        html_source_code = "<!DOCTYPE html>" + driver.page_source
+        try:
+            text_file = open((full_path),
+                             "w", encoding="utf-8")
+            text_file.write(html_source_code)
+            text_file.close()
+        except OSError as error:
+            print("Filename is not valid!", error)
 
     # Scrolling down for full image load
     scroll_page()
 
-    # Create index.html
-    save_page(filename="index.html")
-
     # Define new set to gather all non-repeating href links
-    href_links = set()
+    href_links_set = set()
     a_list = driver.find_elements_by_tag_name("a")
     for link in a_list:
-        href_links.add(link.get_attribute("href"))
+        href_links_set.add(link.get_attribute("href"))
+    href_links = list(href_links_set)
     print('Found:', len(href_links), 'link(s)')
 
-    for href_link in href_links:
+    driver.execute_script('let css_selector; let new_href')
 
-        raw_url = url.replace('https://', '')
+    for href_link in href_links_set:
+
         if not href_link:
             continue
 
-        href_data = href_link.split('/')
+        href_link_raw = href_link.replace('https://', '')
+        href_data = href_link_raw.split('/')
+
         index_path = len(href_data) - 1
 
         if not href_data[index_path]:
+            href_data.pop()
             index_path -= 1
 
-        new_url = href_data[index_path]
-        if new_url == raw_url:
+        if len(href_data) < 1:
             continue
 
-        driver.get(url + "/" + new_url)
+        if len(href_data) < 3:
+            new_url = href_data[index_path]
+        else:
+            new_url = href_data[index_path - 1]
+
+        if ("mailto" in new_url or "tweet" in new_url) or ("facebook" in new_url or "twitter" in new_url):
+            continue
+
+        print(new_url)
+        page_filename = href_data[len(href_data) - 1] + ".html"
+        html_path = new_url.replace("/", "\\")
+        driver.get(href_link)
         scroll_page()
-        save_page(path=new_url, filename=(new_url + ".html"))
+        save_page(path=html_path, filename=page_filename)
 
+    driver.get(url)
+    scroll_page()
 
-web_scraper('https://www.classcentral.com/', "hi")
+    for href_link in href_links:
 
-# web_scraper('https://www.cmcsas.co', "hi")
+        if not href_link:
+            continue
+
+        href_link_raw = href_link.replace('https://', '')
+        href_data = href_link_raw.split('/')
+
+        index_path = len(href_data) - 1
+
+        if not href_data[index_path]:
+            href_data.pop()
+            index_path -= 1
+
+        if len(href_data) < 1:
+            continue
+
+        if len(href_data) < 3:
+            new_url = href_data[index_path]
+        else:
+            new_url = href_data[index_path - 1]
+
+        if ("mailto" in new_url or "tweet" in new_url) or ("facebook" in new_url or "twitter" in new_url):
+            continue
+
+        print(new_url)
+        page_filename = href_data[len(href_data) - 1] + ".html"
+
+        css_selector_element = 'a[href="' + href_link + '"]'
+        new_href = (new_url + "/" + page_filename)
+
+        driver.execute_script('css_selector = ' + "'" +
+                              css_selector_element + "'")
+        driver.execute_script('new_href = ' + "'" + new_href + "'")
+        try:
+            driver.execute_script(
+                "try {document.querySelector(css_selector).setAttribute('href', new_href)} catch (error) {console.log()}")
+        finally:
+            print('JS Error!')
+            alt_href = "/" + new_url + "/" + href_data[len(href_data) - 1]
+            css_selector_element = 'a[href="' + alt_href + '"]'
+            driver.execute_script('css_selector = ' +
+                                  "'" + css_selector_element + "'")
+            driver.execute_script(
+                "try {document.querySelector(css_selector).setAttribute('href', new_href)} catch (error) {console.log()}")
+    # Create index.html
+    save_page(filename="index.html")

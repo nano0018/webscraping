@@ -131,3 +131,6 @@ dmypy.json
 
 # Executables
 .driver
+
+# Web files
+web
