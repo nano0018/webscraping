@@ -16,6 +16,7 @@
         "cert": "C:\\Users\\dacif\\server_ssl\\server.crt", //full path of the certificate
         "key": "C:\\Users\\dacif\\server_ssl\\server.key", //full path of the private key
         "passphrase": "12345"
-        }
+        },
+        "liveServer.settings.port": 5501
         
 }

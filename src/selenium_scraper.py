@@ -7,6 +7,7 @@ import pyautogui
 
 from selenium import webdriver
 from selenium.webdriver import ActionChains
+from sorted_list import create_html_index
 
 
 def web_scraper(url, language="es"):
@@ -174,3 +175,4 @@ def web_scraper(url, language="es"):
                 "try {document.querySelector(css_selector).setAttribute('href', new_href)} catch (error) {console.log()}")
     # Create index.html
     save_page(filename="index.html")
+    create_html_index()
